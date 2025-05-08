@@ -4,6 +4,8 @@ using UnityEngine;
 public class Spline : MonoBehaviour
 {
     [SerializeField] GameObject pointPrefab;
+    public bool looping = false;
+    public bool mirrored = false;
     [SerializeField] float timeScale = 1;
     public BezierCurve[] curves;
     
@@ -46,7 +48,7 @@ public class Spline : MonoBehaviour
     
     public Vector3 CalculatePointOnSpline(float timeStamp, BezierCurve curve)
     {
-        //method 1
+        //method 1 ---------------------------------------------------------------------------------------------------------------
         
         //Vector3 tempPoint1 = Vector3.Lerp(sphere1.transform.position, sphere2.transform.position, timeVar);
         //Vector3 tempPoint2 = Vector3.Lerp(sphere2.transform.position, sphere3.transform.position, timeVar);
@@ -57,7 +59,7 @@ public class Spline : MonoBehaviour
         
         //movingPoint.transform.position = Vector3.Lerp(tempPoint4, tempPoint5, timeVar);
         
-        //method 2
+        //method 2 ---------------------------------------------------------------------------------------------------------------
         
         // movingPoint.transform.position = 
         // sphere1.transform.position * (Mathf.Pow(-timeVar, 3) + (3 * Mathf.Pow(timeVar, 2)) - (3 * timeVar) + 1) +
@@ -65,7 +67,7 @@ public class Spline : MonoBehaviour
         // sphere3.transform.position * (-3 * Mathf.Pow(timeVar, 3) + (3 * Mathf.Pow(timeVar, 2))) +
         // sphere4.transform.position * Mathf.Pow(timeVar, 3);
         
-        //method 3
+        //method 3 ---------------------------------------------------------------------------------------------------------------
         
         Vector4 powersOfT = new(1, timeStamp, Mathf.Pow(timeStamp, 2), Mathf.Pow(timeStamp, 3));
         
@@ -110,7 +112,6 @@ public class Spline : MonoBehaviour
             Vector4.Dot(powersOfT, new(positionMatrix[0,2], positionMatrix[1,2], positionMatrix[2,2], positionMatrix[3,2]))
         );
         
-        //return transform.InverseTransformDirection(returnValue);
         return returnValue;
     }
 }
