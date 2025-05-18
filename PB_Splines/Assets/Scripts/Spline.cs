@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class Spline : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class Spline : MonoBehaviour
     [SerializeField] float timeScale = 1;
     public BezierCurve[] curves;
     
-    static readonly Matrix4x4 characteristicMatrix = new(
+    static readonly float4x4 characteristicMatrix = new(
         new( 1,  0,  0,  0),
         new(-3,  3,  0,  0),
         new( 3, -6,  3,  0),
@@ -69,48 +70,59 @@ public class Spline : MonoBehaviour
         
         //method 3 ---------------------------------------------------------------------------------------------------------------
         
-        Vector4 powersOfT = new(1, timeStamp, Mathf.Pow(timeStamp, 2), Mathf.Pow(timeStamp, 3));
+        float4 powersOfT = new(1, timeStamp, Mathf.Pow(timeStamp, 2), Mathf.Pow(timeStamp, 3));
         
         Vector3 worldPoint0 = curve.points[0] + transform.position;
         Vector3 worldPoint1 = curve.points[1] + transform.position;
         Vector3 worldPoint2 = curve.points[2] + transform.position;
         Vector3 worldPoint3 = curve.points[3] + transform.position;
-        
-        float[,] pointMatrix = {
-            { worldPoint0.x, worldPoint0.y, worldPoint0.z },
-            { worldPoint1.x, worldPoint1.y, worldPoint1.z },
-            { worldPoint2.x, worldPoint2.y, worldPoint2.z },
-            { worldPoint3.x, worldPoint3.y, worldPoint3.z },
-        };
-        
-        float[,] positionMatrix = {
-            {
-                Vector4.Dot(new(characteristicMatrix[0,0], characteristicMatrix[1,0], characteristicMatrix[2,0], characteristicMatrix[3,0]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
-                Vector4.Dot(new(characteristicMatrix[0,0], characteristicMatrix[1,0], characteristicMatrix[2,0], characteristicMatrix[3,0]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
-                Vector4.Dot(new(characteristicMatrix[0,0], characteristicMatrix[1,0], characteristicMatrix[2,0], characteristicMatrix[3,0]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
-            },
-            {
-                Vector4.Dot(new(characteristicMatrix[0,1], characteristicMatrix[1,1], characteristicMatrix[2,1], characteristicMatrix[3,1]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
-                Vector4.Dot(new(characteristicMatrix[0,1], characteristicMatrix[1,1], characteristicMatrix[2,1], characteristicMatrix[3,1]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
-                Vector4.Dot(new(characteristicMatrix[0,1], characteristicMatrix[1,1], characteristicMatrix[2,1], characteristicMatrix[3,1]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
-            },
-            {
-                Vector4.Dot(new(characteristicMatrix[0,2], characteristicMatrix[1,2], characteristicMatrix[2,2], characteristicMatrix[3,2]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
-                Vector4.Dot(new(characteristicMatrix[0,2], characteristicMatrix[1,2], characteristicMatrix[2,2], characteristicMatrix[3,2]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
-                Vector4.Dot(new(characteristicMatrix[0,2], characteristicMatrix[1,2], characteristicMatrix[2,2], characteristicMatrix[3,2]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
-            },
-            {
-                Vector4.Dot(new(characteristicMatrix[0,3], characteristicMatrix[1,3], characteristicMatrix[2,3], characteristicMatrix[3,3]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
-                Vector4.Dot(new(characteristicMatrix[0,3], characteristicMatrix[1,3], characteristicMatrix[2,3], characteristicMatrix[3,3]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
-                Vector4.Dot(new(characteristicMatrix[0,3], characteristicMatrix[1,3], characteristicMatrix[2,3], characteristicMatrix[3,3]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
-            }
-        };
-        
-        Vector3 returnValue = new(
-            Vector4.Dot(powersOfT, new(positionMatrix[0,0], positionMatrix[1,0], positionMatrix[2,0], positionMatrix[3,0])),
-            Vector4.Dot(powersOfT, new(positionMatrix[0,1], positionMatrix[1,1], positionMatrix[2,1], positionMatrix[3,1])),
-            Vector4.Dot(powersOfT, new(positionMatrix[0,2], positionMatrix[1,2], positionMatrix[2,2], positionMatrix[3,2]))
+
+        // float[,] pointMatrix = {
+        //     { worldPoint0.x, worldPoint0.y, worldPoint0.z },
+        //     { worldPoint1.x, worldPoint1.y, worldPoint1.z },
+        //     { worldPoint2.x, worldPoint2.y, worldPoint2.z },
+        //     { worldPoint3.x, worldPoint3.y, worldPoint3.z },
+        // };
+
+        float4x3 pointMatrix = new(
+            worldPoint0.x, worldPoint0.y, worldPoint0.z,
+            worldPoint1.x, worldPoint1.y, worldPoint1.z,
+            worldPoint2.x, worldPoint2.y, worldPoint2.z,
+            worldPoint3.x, worldPoint3.y, worldPoint3.z
         );
+
+        // float[,] positionMatrix = {
+        //     {
+        //         Vector4.Dot(new(characteristicMatrix[0,0], characteristicMatrix[1,0], characteristicMatrix[2,0], characteristicMatrix[3,0]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
+        //         Vector4.Dot(new(characteristicMatrix[0,0], characteristicMatrix[1,0], characteristicMatrix[2,0], characteristicMatrix[3,0]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
+        //         Vector4.Dot(new(characteristicMatrix[0,0], characteristicMatrix[1,0], characteristicMatrix[2,0], characteristicMatrix[3,0]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
+        //     },
+        //     {
+        //         Vector4.Dot(new(characteristicMatrix[0,1], characteristicMatrix[1,1], characteristicMatrix[2,1], characteristicMatrix[3,1]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
+        //         Vector4.Dot(new(characteristicMatrix[0,1], characteristicMatrix[1,1], characteristicMatrix[2,1], characteristicMatrix[3,1]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
+        //         Vector4.Dot(new(characteristicMatrix[0,1], characteristicMatrix[1,1], characteristicMatrix[2,1], characteristicMatrix[3,1]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
+        //     },
+        //     {
+        //         Vector4.Dot(new(characteristicMatrix[0,2], characteristicMatrix[1,2], characteristicMatrix[2,2], characteristicMatrix[3,2]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
+        //         Vector4.Dot(new(characteristicMatrix[0,2], characteristicMatrix[1,2], characteristicMatrix[2,2], characteristicMatrix[3,2]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
+        //         Vector4.Dot(new(characteristicMatrix[0,2], characteristicMatrix[1,2], characteristicMatrix[2,2], characteristicMatrix[3,2]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
+        //     },
+        //     {
+        //         Vector4.Dot(new(characteristicMatrix[0,3], characteristicMatrix[1,3], characteristicMatrix[2,3], characteristicMatrix[3,3]), new(pointMatrix[0,0], pointMatrix[1,0], pointMatrix[2,0], pointMatrix[3,0])),
+        //         Vector4.Dot(new(characteristicMatrix[0,3], characteristicMatrix[1,3], characteristicMatrix[2,3], characteristicMatrix[3,3]), new(pointMatrix[0,1], pointMatrix[1,1], pointMatrix[2,1], pointMatrix[3,1])),
+        //         Vector4.Dot(new(characteristicMatrix[0,3], characteristicMatrix[1,3], characteristicMatrix[2,3], characteristicMatrix[3,3]), new(pointMatrix[0,2], pointMatrix[1,2], pointMatrix[2,2], pointMatrix[3,2]))
+        //     }
+        // };
+
+        float4x3 positionMatrix = math.mul(characteristicMatrix, pointMatrix);
+
+        // Vector3 returnValue = new(
+        //     Vector4.Dot(powersOfT, new(positionMatrix[0,0], positionMatrix[1,0], positionMatrix[2,0], positionMatrix[3,0])),
+        //     Vector4.Dot(powersOfT, new(positionMatrix[0,1], positionMatrix[1,1], positionMatrix[2,1], positionMatrix[3,1])),
+        //     Vector4.Dot(powersOfT, new(positionMatrix[0,2], positionMatrix[1,2], positionMatrix[2,2], positionMatrix[3,2]))
+        // );
+
+        Vector3 returnValue = math.mul(powersOfT, positionMatrix);
         
         return returnValue;
     }
