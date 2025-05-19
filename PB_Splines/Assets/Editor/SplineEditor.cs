@@ -5,6 +5,10 @@ using UnityEngine;
 public class SplineEditor : Editor
 {
     const int linesPerCurve = 20;
+    const float handleSize = 0.04f;
+	const float pickSize = 0.06f;
+	
+	int selectedIndex = -1;
     
     void OnSceneGUI()
     {
@@ -30,8 +34,11 @@ public class SplineEditor : Editor
             Vector3 lineStart = curve.points[0] + spline.transform.position;
             for (int j = 0; j <= linesPerCurve; j++)
             {
-                Vector3 lineEnd = spline.CalculatePointOnSpline(j / (1f * linesPerCurve), curve);
+                Handles.color = Color.white;
+                Vector3 lineEnd = spline.curves[i].CalculatePointOnSpline(j / (1f * linesPerCurve), spline.transform.position);
                 Handles.DrawLine(spline.transform.TransformDirection(lineStart), spline.transform.TransformDirection(lineEnd));
+                Handles.color = Color.green;
+                Handles.DrawLine(lineEnd, lineEnd + curve.GetDirection(j / (float)linesPerCurve, spline.transform));
                 lineStart = lineEnd;
             }
         }
@@ -41,6 +48,15 @@ public class SplineEditor : Editor
     {
         Vector3 point = handleTransform.TransformPoint(curve.points[pointIndex]);
         Vector3 oldPoint = point;
+        float size = HandleUtility.GetHandleSize(point);
+        Handles.color = Color.white;
+        
+        if (Handles.Button(point, handleRotation, size * handleSize, size * pickSize, Handles.DotHandleCap))
+        {
+            selectedIndex = pointIndex + curveIndex * 4;
+        }
+        
+        if (selectedIndex != pointIndex + curveIndex * 4) return point;
         
         EditorGUI.BeginChangeCheck();
         point = Handles.DoPositionHandle(point, handleRotation);
@@ -58,13 +74,13 @@ public class SplineEditor : Editor
             {
                 spline.curves[curveIndex+1].points[0] = handleTransform.InverseTransformPoint(point);
             }
-            else if (spline.looping)
+            else if (spline.Loop)
             {
                 if (curveIndex == 0 && pointIndex == 0) spline.curves[^1].points[3] = handleTransform.InverseTransformPoint(point);
                 else if (curveIndex == spline.curves.Length-1 && pointIndex == 3) spline.curves[0].points[0] = handleTransform.InverseTransformPoint(point);
             }
             
-            if (spline.mirrored)
+            if (spline.Mirrored)
             {
                 Vector3 pointDiff = point - oldPoint;
                 
@@ -72,27 +88,27 @@ public class SplineEditor : Editor
                 {
                     curve.points[1] += pointDiff;
                     if (curveIndex > 0) spline.curves[curveIndex-1].points[2] += pointDiff;
-                    else if (spline.looping && curveIndex == 0) spline.curves[^1].points[2] += pointDiff;
+                    else if (spline.Loop && curveIndex == 0) spline.curves[^1].points[2] += pointDiff;
                 }
                 else if (pointIndex == 1)
                 {
                     Vector3 oppositePos = (curve.points[0] - curve.points[1]) * 2 + curve.points[1];
                     
-                    if (spline.looping && curveIndex == 0) spline.curves[^1].points[2] = oppositePos;
+                    if (spline.Loop && curveIndex == 0) spline.curves[^1].points[2] = oppositePos;
                     else if (curveIndex > 0) spline.curves[curveIndex-1].points[2] = oppositePos;
                 }
                 else if (pointIndex == 2)
                 {
                     Vector3 oppositePos = (curve.points[3] - curve.points[2]) * 2 + curve.points[2];
                     
-                    if (spline.looping && curveIndex == spline.curves.Length-1) spline.curves[0].points[1] = oppositePos;
+                    if (spline.Loop && curveIndex == spline.curves.Length-1) spline.curves[0].points[1] = oppositePos;
                     else if (curveIndex < spline.curves.Length-1) spline.curves[curveIndex+1].points[1] = oppositePos;
                 }
                 else if (pointIndex == 3)
                 {
                     curve.points[2] += pointDiff;
                     if (curveIndex < spline.curves.Length-1) spline.curves[curveIndex+1].points[1] += pointDiff;
-                    else if (spline.looping && curveIndex == spline.curves.Length-1) spline.curves[0].points[1] += pointDiff;
+                    else if (spline.Loop && curveIndex == spline.curves.Length-1) spline.curves[0].points[1] += pointDiff;
                 }
             }
         }
