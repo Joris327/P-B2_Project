@@ -35,7 +35,7 @@ public class SplineEditor : Editor
             for (int j = 0; j <= linesPerCurve; j++)
             {
                 Handles.color = Color.white;
-                Vector3 lineEnd = spline.curves[i].CalculatePointOnSpline(j / (1f * linesPerCurve), spline.transform.position);
+                Vector3 lineEnd = spline.curves[i].CalculatePointOnCurve(j / (1f * linesPerCurve), spline.transform.position);
                 Handles.DrawLine(spline.transform.TransformDirection(lineStart), spline.transform.TransformDirection(lineEnd));
                 Handles.color = Color.green;
                 Handles.DrawLine(lineEnd, lineEnd + curve.GetDirection(j / (float)linesPerCurve, spline.transform));

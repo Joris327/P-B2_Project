@@ -17,7 +17,7 @@ public class SplineFollower : MonoBehaviour
     {
         if (!spline || spline.curves.Length < 1) return;
         
-        transform.position = spline.curves[curveIndex].CalculatePointOnSpline(timeVar, spline.transform.position);
+        transform.position = spline.curves[curveIndex].CalculatePointOnCurve(timeVar, spline.transform.position);
         
         timeVar += Time.deltaTime * timeScale;
         

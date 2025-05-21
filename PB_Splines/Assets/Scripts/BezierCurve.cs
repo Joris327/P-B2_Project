@@ -7,6 +7,10 @@ public class BezierCurve
         new(), new(), new(), new()
     };
     
+    public float[] angles = {
+        0, 0, 0, 0
+    };
+    
     static readonly Matrix4x4 characteristicMatrix = new(
         new( 1,  0,  0,  0),
         new(-3,  3,  0,  0),
@@ -44,28 +48,28 @@ public class BezierCurve
         return GetVelocity(t, splineTransform).normalized;
     }
     
-    public Vector3 CalculatePointOnSpline(float timeStamp, Vector3 position)
+    public Vector3 CalculatePointOnCurve(float timeStamp, Vector3 position)
     {
-        Mathf.Clamp01(timeStamp);
+        timeStamp = Mathf.Clamp01(timeStamp);
         
         //method 1 ---------------------------------------------------------------------------------------------------------------
         
-        //Vector3 tempPoint1 = Vector3.Lerp(sphere1.transform.position, sphere2.transform.position, timeVar);
-        //Vector3 tempPoint2 = Vector3.Lerp(sphere2.transform.position, sphere3.transform.position, timeVar);
-        //Vector3 tempPoint3 = Vector3.Lerp(sphere3.transform.position, sphere4.transform.position, timeVar);
+        // Vector3 tempPoint1 = Vector3.Lerp(points[0], points[1], timeStamp);
+        // Vector3 tempPoint2 = Vector3.Lerp(points[2], points[3], timeStamp);
+        // Vector3 tempPoint3 = Vector3.Lerp(points[3], points[4], timeStamp);
         
-        //Vector3 tempPoint4 = Vector3.Lerp(tempPoint1, tempPoint2, timeVar);
-        //Vector3 tempPoint5 = Vector3.Lerp(tempPoint2, tempPoint3, timeVar);
+        // Vector3 tempPoint4 = Vector3.Lerp(tempPoint1, tempPoint2, timeStamp);
+        // Vector3 tempPoint5 = Vector3.Lerp(tempPoint2, tempPoint3, timeStamp);
         
-        //movingPoint.transform.position = Vector3.Lerp(tempPoint4, tempPoint5, timeVar);
+        // return Vector3.Lerp(tempPoint4, tempPoint5, timeStamp);
         
         //method 2 ---------------------------------------------------------------------------------------------------------------
         
-        // movingPoint.transform.position = 
-        // sphere1.transform.position * (Mathf.Pow(-timeVar, 3) + (3 * Mathf.Pow(timeVar, 2)) - (3 * timeVar) + 1) +
-        // sphere2.transform.position * (3 * Mathf.Pow(timeVar, 3) - (6 * Mathf.Pow(timeVar, 2)) + (3 * timeVar)) +
-        // sphere3.transform.position * (-3 * Mathf.Pow(timeVar, 3) + (3 * Mathf.Pow(timeVar, 2))) +
-        // sphere4.transform.position * Mathf.Pow(timeVar, 3);
+        // return 
+        //     points[0] * (Mathf.Pow(-timeStamp, 3) + (3 * Mathf.Pow(timeStamp, 2)) - (3 * timeStamp) + 1) +
+        //     points[1] * (3 * Mathf.Pow(timeStamp, 3) - (6 * Mathf.Pow(timeStamp, 2)) + (3 * timeStamp)) +
+        //     points[2] * (-3 * Mathf.Pow(timeStamp, 3) + (3 * Mathf.Pow(timeStamp, 2))) +
+        //     points[3] * Mathf.Pow(timeStamp, 3);
         
         //method 3 ---------------------------------------------------------------------------------------------------------------
         
