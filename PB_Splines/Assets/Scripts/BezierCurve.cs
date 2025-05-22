@@ -8,7 +8,7 @@ public class BezierCurve
     };
     
     public float[] angles = {
-        0, 0, 0, 0
+        new(), new()
     };
     
     static readonly Matrix4x4 characteristicMatrix = new(
