@@ -95,6 +95,8 @@ public class SplineMesh : MonoBehaviour
             vertices = vertices.ToArray(),
             triangles = triangles.ToArray()
         };
+        
+        meshFilter.mesh.RecalculateNormals();
     }
     
     void AddVertexes(Vector3 centrePoint, BezierCurve curve, float progress, List<Vector2> uv)
