@@ -15,7 +15,7 @@ public class SplineFollower : MonoBehaviour
     
     void TravelAlongSpline()
     {
-        if (!spline || spline.curves.Length < 1) return;
+        if (!spline || spline.curves.Count < 1) return;
         
         transform.position = spline.curves[curveIndex].CalculatePointOnCurve(timeVar, spline.transform.position);
         
@@ -24,7 +24,7 @@ public class SplineFollower : MonoBehaviour
         if (timeVar >= 1)
         {
             timeVar = 0;
-            curveIndex = curveIndex < spline.curves.Length-1 ? curveIndex+1: curveIndex = 0;
+            curveIndex = curveIndex < spline.curves.Count-1 ? curveIndex+1: curveIndex = 0;
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 public class BezierCurve
 {
     public Vector3[] points = {
-        new(), new(), new(), new()
+        new(0, 0, 0), new(1, 0, 0), new(2, 0, 0), new(3, 0, 0)
     };
     
     public float[] angles = {
@@ -25,22 +25,31 @@ public class BezierCurve
         points[2] = pPoint2;
         points[3] = pPoint3;
     }
+
+    public BezierCurve(Vector3 anchor)
+    {
+        points = new Vector3[] {
+            anchor, anchor + new Vector3(1, 0, 0), anchor + new Vector3(2, 0, 0), anchor + new Vector3(3, 0, 0)
+        };
+
+        angles = new float[] {
+            0, 0
+        };
+    }
     
-    public BezierCurve() {}
-    
-    public static Vector3 GetFirstDerivative(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+    public Vector3 GetFirstDerivative(float t)
     {
 		t = Mathf.Clamp01(t);
 		float oneMinusT = 1f - t;
 		return
-			3f * oneMinusT * oneMinusT * (p1 - p0) +
-			6f * oneMinusT * t * (p2 - p1) +
-			3f * t * t * (p3 - p2);
+			3f * oneMinusT * oneMinusT * (points[1] - points[0]) +
+			6f * oneMinusT * t * (points[2] - points[1]) +
+			3f * t * t * (points[3] - points[2]);
 	}
     
     public Vector3 GetVelocity (float t, Transform splineTransform)
     {
-		return splineTransform.TransformPoint(GetFirstDerivative(points[0], points[1], points[2], points[3], t)) - splineTransform.position;
+		return splineTransform.TransformPoint(GetFirstDerivative(t)) - splineTransform.position;
 	}
     
     public Vector3 GetDirection(float t, Transform splineTransform)
