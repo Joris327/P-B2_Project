@@ -10,7 +10,7 @@ public class Spline : MonoBehaviour
     [SerializeField] bool mirrored = false;
     public bool Mirrored { get { return mirrored; } }
 
-    [HideInInspector] public List<BezierCurve> curves = new();
+     public List<BezierCurve> curves = new();
     
     public int linesPerCurve = 20;
     public bool showDirection = true;

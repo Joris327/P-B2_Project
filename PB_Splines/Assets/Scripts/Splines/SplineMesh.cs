@@ -110,10 +110,14 @@ public class SplineMesh : MonoBehaviour
     
     void AddVertexes(Vector3 centrePoint, BezierCurve curve, float progress, List<Vector2> uv)
     {
+        progress = Mathf.Clamp01(progress);
         Vector3 direction = curve.GetDirection(progress, transform);
-        
-        float interpolatedAngle = Mathf.Lerp(curve.angles[0], curve.angles[1], progress);
-        
+        //Vector3 direction = curve.CalculatePointOnCurve(progress + 1 / vertexResolution, transform.position) - centrePoint;
+        //direction.Normalize();
+
+        float interpolatedAngle = Mathf.LerpAngle(curve.angles[0], curve.angles[1], progress);
+        //float interpolatedAngle = ((curve.angles[0] + curve.angles[1]) / 2) * progress;
+        if (progress == 0.5f) Debug.Log(interpolatedAngle);
         Vector3 angleDir = direction; //forward
         
         //angleDir = Quaternion.Euler(0, -90, 0) * angleDir; //90 degrees along global y axis
